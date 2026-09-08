@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>시조의 숲 — 초·중·종 이어 붙이기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@300;400;600&family=Gowun+Dodum&display=swap" rel="stylesheet">
+
+<script>
+/* ============================================================
+   ① 시조 데이터  ―  여기만 고치면 됩니다
+   ------------------------------------------------------------
+   작품 한 수당 객체 하나. 초·중·종을 한 덩어리로 두면
+   프로그램이 초장 더미 / 중장 더미 / 종장 더미로 나눠 씁니다.
+
+   title  : 연작처럼 제목이 분명한 것만. 없으면 이 칸을 빼세요
+            <어부사시사> 처럼 꺾쇠로 감싸면 화면에서 「어부사시사」 로 나옵니다
+   author : 작가명
+   cho / jung / jong : 현대어 표기 원문
+            한자 병기는 (漢字) 든 [漢字] 든 그대로 두면 화면에서 작게 표시됩니다
+   notes  : 주석. 엑셀에 쓰시던 그대로 "*낱말: 뜻" 형식입니다.
+            여러 개면 "*밴 일: 망한 일 *인 일: 잘된 일" 처럼 이어 쓰면 됩니다.
+            구분자는 : 나 - 둘 다 됩니다.
+            낱말은 원문에 나온 그대로 적어야 밑줄이 붙습니다.
+            없는 작품은 이 칸을 빼면 됩니다.
+   ============================================================ */
+const SIJO = [
+  {
+    author:"이색(李穡)",
+    cho:"백설(白雪)이 잦아진 골에 구름이 머무누나",
+    jung:"반가운 매화(梅花)는 어느 곳에 피었는가",
+    jong:"석양(夕陽)에 홀로이 서서 갈 곳 몰라 하노라" },
+
+  {
+    author:"황진이(黃眞伊)",
+    cho:"산은 옛 산이로되 물은 옛물 아니로다",
+    jung:"주야(晝夜)에 흐르니 옛물이 있을소냐",
+    jong:"인걸(人傑)도 물과 같아 가고 아니 오노매라" },
+
+  {
+    author:"황희(黃喜)",
+    cho:"강호(江湖)에 봄이 드니 이 몸이 일이 많다",
+    jung:"나는 그물 깁고 아이는 밭을 가니",
+    jong:"뒷 산에 엉긴 약초를 언제 캐랴 하나니" },
+
+  {
+    author:"황희(黃喜)",
+    cho:"삿갓에 도롱이 닙고 가는 빗속 호미 메고",
+    jung:"산밭을 흩어 매다가 나무 그늘에 누어시니",
+    jong:"목동이 소와 양을 몰아 잠든 나를 깨우는구나" },
+
+  {
+    author:"황희(黃喜)",
+    cho:"뒷산에 새들 다 끊어지고 앞길에 갈 사람 업다",
+    jung:"외로운 배 위에 삿갓 쓴 저 늙은이",
+    jong:"낚시에 맛이 깊도다 눈 쌓이는 줄 모르는구나" },
+
+  {
+    title:"<한거십팔곡>제6수", author:"권호문(權好文)",
+    cho:"하려 하려 하되 이 뜻 못하여라",
+    jung:"이 뜻 하면 지락(至樂)이 있나니라",
+    jong:"우습다 엊그제 아니라던 일을 누가 옳다고 하던고" },
+
+  {
+    title:"<한거십팔곡>제7수", author:"권호문(權好文)",
+    cho:"말리 말리 하되 이 일 말기 어렵다",
+    jung:"이 일 말면 일신(一身)이 한가(閒暇)하다",
+    jong:"어제 엊그제 하던 일이 다 틀린 줄 알겠구나" },
+
+  {
+    title:"<한거십팔곡>제11수", author:"권호문(權好文)",
+    cho:"바람은 절로 맑고 달은 절로 밝다",
+    jung:"죽정송함(竹庭松檻)애 한 점의 먼지도 없으니",
+    jong:"거문고와 만권의 책은 더옥 소쇄(蕭灑)하다",
+    notes:"*죽정송함(竹庭松檻): 대나무숲 뜨락과 당상의 소나무 기둥" },
+
+  {
+    title:"<한거십팔곡>제13수", author:"권호문(權好文)",
+    cho:"날이 저물거늘 도무지 할 일 없어",
+    jung:"소나무 문을 닫고 달 아래 누었으니",
+    jong:"세상에 티끌 마음이 한 치도 없다" },
+
+  {
+    title:"<도산십이곡>제11수", author:"이황(李滉)",
+    cho:"청산(靑山)은 어찌하여 만고(萬古)에 푸르르며",
+    jung:"유수(流水)는 어찌하여 주야(晝夜)에 그치지 아니하는고",
+    jong:"우리도 그치지 마라 만고상청(萬古常靑) 하리라",
+    notes:"*만고상청(萬古常靑): 오래도록 항상 푸르다" },
+
+  {
+    author:"정철(鄭澈)",
+    cho:"내 마음 베어 내어 저 달을 만들고져",
+    jung:"구만리 장천의 번듯이 걸려있어",
+    jong:"고운 님 계신 곳에 가 비취어나 보리라" },
+
+  {
+    title:"<어부사시사> 춘사(春詞) 제8수", author:"윤선도(尹善道)",
+    cho:"취(醉)하여 누웠다가 여울 아래 나리려다",
+    jung:"낙홍(落紅)이 흘러오니 도원(桃源)이 가깝도다",
+    jong:"인세(人世) 홍진(紅塵)이 얼마나 가렸나니" },
+
+  {
+    author:"정철(鄭澈)",
+    cho:"송림(松林)에 눈이 오니 가지마다 꽃이로다",
+    jung:"한 가지 걲어다가 님 계신 데 드리고저",
+    jong:"우리 님 보신 후에 녹아진들 어이리" },
+
+  {
+    author:"무명작",
+    cho:"오늘이 오늘이소서 매일이 오늘이소서",
+    jung:"저물지도 새지도 마르시고",
+    jong:"매양에 주야장상(晝夜長常)에 오늘이 오늘이소서" },
+
+  {
+    author:"무명작",
+    cho:"덕(德)으로 밴 일 없고 악(惡)으로 인 일 없다",
+    jung:"이 두 사이가 그 아니 분명한가",
+    jong:"우리는 잡 근심 떨치고 덕을 닦아 보리라",
+    notes:"*밴 일:망한 일 *인 일:잘된 일" },
+
+  {
+    author:"조식(曺植)",
+    cho:"삼동(三冬)에 베옷 입고 암혈(巖穴)에 눈비 맞아",
+    jung:"구름 낀 햇볕조차 쬔 적이 없건마는",
+    jong:"서산(西山)에 해 지다 하니 눈물겨워 하노라" },
+
+  {
+    author:"무명작",
+    cho:"누운들 잠이 오며 기다린들 님이 오랴",
+    jung:"이제 누워신들 어느 잠이 벌써 오리",
+    jong:"차라리 앉은 곳에서 긴 밤이나 새오리다" },
+
+  {
+    author:"무명작",
+    cho:"한숨은 바람이 되고 눈물은 가랑비 되어",
+    jung:"님 자는 창 밖에 불거니 뿌리거니",
+    jong:"날 잊고 깊이 든 잠을 깨워 볼까 하노라" },
+
+  {
+    author:"이조년(李兆年)",
+    cho:"이화(梨花)에 월백(月白)하고 은한(銀漢)이 삼경(三更)인 제",
+    jung:"나뭇가지에 어린 봄뜻[一枝春心]을 두견새야 알랴마는",
+    jong:"다정(多情)도 병(病)인 양 하여 잠 못 이뤄 하노라" },
+
+  {
+    author:"왕방연(王邦淵)",
+    cho:"천만리 머나먼 길에 고운 님 이별하고",
+    jung:"내 마음 둘 데 없어 냇가에 앉아시니",
+    jong:"저 물도 내 마음 같아 울며 밤길을 가는구나" },
+
+  {
+    author:"유성원(柳誠源)",
+    cho:"초당(草堂)에 일이 없어 거문고를 베고 누워",
+    jung:"태평성대를 꿈에나 보려 하니",
+    jong:"문 앞에 들리는 어부의 피리 소리 잠든 나를 깨우는구나" },
+
+  {
+    author:"이개(李塏)",
+    cho:"방 안에 켠 촛불 누구와 이별하였길래",
+    jung:"눈물을 흘리면서 속 타는 줄 모르는고",
+    jong:"우리도 저 촛불 같도다 속 타는 줄 모르노라" },
+
+  {
+    title:"<도산십이곡>제1수", author:"이황(李滉)",
+    cho:"이런들 어떠하며 저런들 어떠하리",
+    jung:"초야에 묻힌 사람이 아무렇게 지낸들 어떠하리",
+    jong:"하물여 천석고황(泉石膏肓)을 고쳐 무엇 하리오",
+    notes:"*천석고황: 자연을 좋아하는 마음이 고질병이 됨" },
+
+  {
+    author:"송인(宋寅)",
+    cho:"이럭저럭하니 이룬 일이 무엇인고",
+    jung:"흐롱하롱하니 세월이 거의 지나갔구나",
+    jong:"두어라 이미 지난 일이니 아니 놀고 어이리",
+    notes:"*흐롱하롱: 말이나 행동이 가볍고 경망스러우니" },
+
+  {
+    title:"<도산십이곡>제10수", author:"이황(李滉)",
+    cho:"당시에 가던 길을 몇 해를 버려 두고",
+    jung:"어디 가 다니다가 이제야 돌아왔는가",
+    jong:"이제야 돌아오나니 다른 곳 마음 두지 않으리" },
+
+  {
+    author:"송인(宋寅)",
+    cho:"한 달 서른 날에 술잔을 아니 놓았노라",
+    jung:"팔 병도 아니 들고 입 병도 아니 난다",
+    jong:"매일에 병 없는 동안에는 깨지 맒이 어떠리" },
+
+  {
+    author:"송인(宋寅)",
+    cho:"들은 말 즉시 잊고 본 일도 못 본 듯이",
+    jung:"내 인사(人事) 이러함에 남의 시비 모르노라",
+    jong:"다만 손이 성하니 술잔 잡기만 하리라" },
+
+  {
+    author:"서경덕(徐敬德)",
+    cho:"마음이 어린 후이니 하는 일이 다 어리다",
+    jung:"구름 낀 산중에 어느 님 오랴마는",
+    jong:"지는 잎 부는 바람에 행여 그 사람인가 하노라" },
+
+  {
+    author:"성혼(成渾)",
+    cho:"말 없는 청산(靑山)이요 태(態) 없는 유수(流水)로다",
+    jung:"값 없는 청풍(淸風)과 임자 없는 명월(明月)이로다",
+    jong:"이 중에 일 없는 내 몸이 분별(分別)없이 늙으리라" },
+
+  {
+    title:"<어부사시사> 동사(冬詞) 제10수", author:"윤선도(尹善道)",
+    cho:"어와 저물어 간다 연식(宴息)이 마땅토다",
+    jung:"가는 눈 뿌린 길 붉은 꽃 흩어진 데 흥치며 걸어가서",
+    jong:"설월(雪月)이 서봉(西峰)의 넘도록 송창(松窓)을 빗겨 있자" },
+
+  {
+    author:"정철(鄭澈)",
+    cho:"선웃음 참노라 하니 재채기에 코가 쌔하구나",
+    jung:"반교태(半嬌態) 하다 가득 찬 사랑 잃을세라",
+    jong:"단술이 못내 익기 전에 다른 곳 마음 말자",
+    notes:"*반교태: 제대로 하지 못하고 덜된 아양" },
+
+  {
+    author:"정철(鄭澈)",
+    cho:"나올 적 언제더니 추풍에 낙엽 날리더라",
+    jung:"얼음 눈 다 녹고 봄꽃이 피도록",
+    jong:"님다히 기별 모르니 그를 서러워하노라",
+    notes:"*님다히: 님으로부터" },
+
+  {
+    author:"정철(鄭澈)",
+    cho:"청산(靑山)의 희뿌연 빗발 그 어찌 날 속이는가",
+    jung:"도롱이 갓과 망건 누역이 너는 어찌 날 속이는가",
+    jong:"엊그제 비단옷 벗으니 더러워질 것이 없어라",
+    notes:"*누역: 도롱이의 다른 표현" },
+
+  {
+    author:"홍섬(洪暹)",
+    cho:"옥(玉)을 돌이라 하니 그토록 애닯구나",
+    jung:"박물군자(博物君子)는 아는 법 있건마는",
+    jong:"알고도 모르는 체하니 그 때문에 슬퍼 하노라" },
+
+  {
+    author:"이정귀(李廷龜)",
+    cho:"님을 믿을 것인가 못 믿을 것 님이시라",
+    jung:"미더운 시절도 못 믿을 줄 알겠구나",
+    jong:"믿기야 어려우랴마는 아니 믿고 어이하랴" },
+
+  {
+    author:"이명한(李明漢)",
+    cho:"사랑이 어떻더냐 둥글더냐 모지더냐",
+    jung:"길더냐 짧더냐 발일넌냐 자힐너냐",
+    jong:"각별히 긴 줄은 모르되 끝 간 데를 몰라라",
+    notes:"*발일넌냐 자힐너냐: 발로 밟아 잴 수가 있겠더냐 자로 잴 수가 있겠더냐" },
+
+  {
+    author:"이순신(李舜臣)",
+    cho:"한산섬 달 밝은 밤의 수루(戍樓)에 혼자 앉아",
+    jung:"큰 칼 옆에 차고 깊은 시름 사는 적에",
+    jong:"어디서 한 줄기 호드기 소리 나의 애를 끊는구나",
+    notes:"*수루: 변방에서 적을 감시하는 누대" },
+
+  {
+    author:"신흠(申欽)",
+    cho:"내 가슴 헤친 피로 님의 모습 그려내어",
+    jung:"고당(高堂) 소벽(素壁)에 걸어 두고 보고싶구나",
+    jong:"뉘라서 이별을 생기게하여 사람 죽게 하는고" },
+
+  {
+    author:"김광욱(金光煜)",
+    cho:"사람이 죽은 후에 다시 산 사람 보았는가",
+    jung:"왔노라 하는 이 없고 돌아와 날 볼 이 없다",
+    jong:"우리는 그런줄 앎으로 살아있을 때 노니노라" },
+
+  {
+    author:"윤선도(尹善道)",
+    cho:"구름 빛이 좋다하나 검기를 자주 한다",
+    jung:"바람 소리 맑다 하나 그칠 적이 많다",
+    jong:"좋고도 그칠 때 없는 것은 물 뿐인가 하노라" },
+
+  {
+    author:"김창흡(金昌翕)",
+    cho:"공명을 즐겨 마라 영욕(榮辱)이 반이로다",
+    jung:"부귀를 탐치 마라 위기에 처하게 되니라",
+    jong:"우리는 일신이 한가하거니 두려운 일 없어라" },
+
+  {
+    author:"주의식(朱義植)",
+    cho:"인생을 헤아리니 한바탕 꿈이로다",
+    jung:"좋은 일 궂은 일 꿈 속에 꿈이어니",
+    jong:"두어라 꿈 같은 인생이 아니 놀고 어이리" },
+
+  {
+    author:"김수장(金壽長)",
+    cho:"검으면 희다 하고 희면 검다 하네",
+    jung:"검거나 희거나 옳다 할 이 전혀 없다",
+    jong:"차라리 귀 먹고 눈 감아 듣도 보도 말리라" },
+
+  {
+    author:"김천택(金天澤)",
+    cho:"옷 벗어 아이 주어 술집에 외상하고",
+    jung:"푸른 하늘 우러러 달에게 물은 말이",
+    jong:"어즈버 천고의 이백(李白)이 나와 비교해 어떠 하더냐" },
+
+  {
+    author:"유세신(庾世信)",
+    cho:"여위고 병든 말을 누가 돌아볼꼬",
+    jung:"때때로 길게 울어 멀리 마음 두거니와",
+    jong:"차라리 아름다운 풀 우거진 강둑에 오락가락 하리라" },
+
+  {
+    author:"박준한(朴俊漢)",
+    cho:"달밤에 기약 두고 닭 울도록 아니 온다",
+    jung:"새 님을 만났는지 옛정에 잡혔는지",
+    jong:"아무리 시절 인연인들 이토록 속이랴" },
+
+  {
+    author:"인평대군(麟坪大君)",
+    cho:"작은 동산 꽃떨기에 나니는 나비들아",
+    jung:"향내를 좋게 여겨 가지마다 앉지 마라",
+    jong:"석양에 숨죽이고 있던 거미는 그물 걸고 기다린다" },
+
+  {
+    author:"황진이(黃眞伊)",
+    cho:"청산리(靑山裡) 벽계수(碧溪水)야 쉽게 흘러감을 자랑 마라",
+    jung:"한번 바다에 닿으면 다시 오기 어려우니",
+    jong:"밝은 달 빈 산에 가득하니 쉬어간들 어떠리",
+    notes:"*청산리(靑山裡) 벽계수(碧溪水): 푸른 산 속에 흐르는 맑은 시냇물" },
+
+  {
+    author:"계랑(桂娘)",
+    cho:"이화우(梨花雨) 흣뿌릴 제 울며 잡고 이별한 님",
+    jung:"춘풍 낙엽에 저도 날 생각하는가",
+    jong:"천리에 외로운 꿈은 오락가락 한다",
+    notes:"*이화우: 비처럼 휘날리는 배꽃잎" },
+
+  {
+    author:"무명작",
+    cho:"추강(秋江)에 밤이 드니 물결이 차노매라",
+    jung:"낚시대 드리우니 고기 아니 무노매라",
+    jong:"무심한 달빛만 싣고 빈 배 저어 오노라" },
+];
+
+
+
+/* ============================================================
+   ② 배경 그림  ―  초·중·종 화면마다 다른 풍경
+   ------------------------------------------------------------
+   name  : 화면 오른쪽 아래에 작게 뜨는 이름
+   tone  : "light" 밝은 그림 / "dark" 어두운 그림
+           → 그림 위에 덮는 막과 글자 색이 여기에 맞춰 바뀝니다
+           밝은 그림에 "dark" 를 두면 흰 글씨가 되어 안 읽힙니다
+   image : 그림 파일 경로. bg 폴더 안의 파일을 가리킵니다
+
+   그림을 바꾸시려면 둘 중 하나면 됩니다.
+     (1) bg 폴더의 파일을 같은 이름으로 덮어쓰기 → 아래는 손댈 것 없음
+     (2) 새 파일을 bg 에 넣고 아래 경로만 고치기
+   가로로 긴 그림(1760px 이상)이 좋고, 400KB 안쪽이면 더 빨리 뜹니다.
+   ============================================================ */
+const SCENES = [
+  { name:"봄 물가의 정자", tone:"light", image:"bg/1_bom.jpg" },
+  { name:"달빛 대숲 길",   tone:"dark",  image:"bg/2_daesup.jpg" },
+  { name:"달 오른 산중",   tone:"dark",  image:"bg/3_san.jpg" }
+];
+
+const CARDS_PER_ROUND = 3;   // 한 판에 보여 줄 카드 수
+const UNLOCK_AFTER = 3;      // 몇 수를 지어야 '직접 쓰기'가 열리는가
+
+/* 방금 나온 작품을 얼마나 오래 다시 안 뽑을지 (0 ~ 0.7)
+   0.4 면 전체의 40%를 "최근 본 것"으로 묶어 두고 나머지에서 먼저 뽑습니다.
+   작품 수가 적을 때 같은 구절이 자꾸 나오는 것을 막아 줍니다.
+   0 으로 두면 이 기능이 꺼집니다. */
+const RECENT_RATIO = 0.4;
+</script>
+
+<style>
+:root{
+  --hanji:#e8dfcb; --hanji-card:#f2ebd9; --hanji-deep:#ded2b8;
+  --muk:#1d1a16; --dammuk:#6d6355; --yeonmuk:#b5a98f; --inju:#a5362a;
+  --serif:"Hahmlet","Nanum Myeongjo",serif;
+  --sans:"Gowun Dodum","Apple SD Gothic Neo",sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--hanji);color:var(--muk);font-family:var(--sans);min-height:100vh;
+  -webkit-font-smoothing:antialiased}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:99;opacity:.26;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 20px 90px;position:relative;z-index:1}
+.hidden{display:none!important}
+
+/* 배경 풍경 — 고르는 동안에만 */
+.scene{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;transition:opacity .9s ease}
+.scene.in{opacity:1}
+.scene img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.scene::after{content:"";position:absolute;inset:0}
+body.sc-dark .scene::after{
+  background:linear-gradient(to bottom,rgba(16,21,30,.66) 0%,rgba(16,21,30,.24) 40%,rgba(16,21,30,.74) 100%)}
+body.sc-light .scene::after{
+  background:linear-gradient(to bottom,rgba(238,231,213,.80) 0%,rgba(238,231,213,.42) 40%,rgba(238,231,213,.86) 100%)}
+.scene .cap{position:absolute;right:18px;bottom:12px;z-index:2;font-size:11px;letter-spacing:.14em}
+body.sc-dark .scene .cap{color:rgba(242,235,217,.55)}
+body.sc-light .scene .cap{color:rgba(61,55,44,.55)}
+
+/* 어두운 그림 위에서는 글자를 밝게 뒤집습니다 */
+body.playing.sc-dark .brand,body.playing.sc-dark .brand span{color:#efe6d0}
+body.playing.sc-dark .top{border-bottom-color:rgba(239,230,208,.3)}
+body.playing.sc-dark .steps{color:rgba(239,230,208,.75)}
+body.playing.sc-dark .steps b{border-color:rgba(239,230,208,.45);background:rgba(18,24,34,.35);color:#efe6d0}
+body.playing.sc-dark .steps b.on{background:#efe6d0;color:#1d1a16;border-color:#efe6d0}
+body.playing.sc-dark .steps b.done{background:rgba(239,230,208,.28);color:#efe6d0}
+body.playing.sc-dark #playScreen .ask h2{color:#f4ecd8;text-shadow:0 2px 18px rgba(12,16,24,.6)}
+body.playing.sc-dark #playScreen .ask p{color:rgba(244,236,216,.8);text-shadow:0 1px 12px rgba(12,16,24,.6)}
+body.playing.sc-dark #playScreen .card{box-shadow:0 14px 34px rgba(10,14,22,.42)}
+body.playing.sc-dark #playScreen .picked{border-top-color:rgba(239,230,208,.3);
+  background:rgba(18,24,34,.42);border-radius:3px;padding:20px 24px;
+  -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+body.playing.sc-dark #playScreen .picked li{color:rgba(244,236,216,.9)}
+body.playing.sc-dark #playScreen .picked li i{color:rgba(244,236,216,.5)}
+body.playing.sc-dark #playScreen .bar .btn{background:rgba(18,24,34,.42);border-color:rgba(239,230,208,.4);color:#efe6d0}
+body.playing.sc-dark #playScreen .bar .btn:hover{background:#efe6d0;color:#1d1a16}
+
+/* 밝은 그림 위에서는 먹색 그대로 두고 판만 또렷하게 */
+body.playing.sc-light #playScreen .ask h2,
+body.playing.sc-light #playScreen .ask p{text-shadow:0 1px 14px rgba(242,235,217,.9)}
+body.playing.sc-light #playScreen .card{box-shadow:0 12px 30px rgba(60,54,42,.22)}
+body.playing.sc-light #playScreen .picked{background:rgba(242,235,217,.78);
+  border-radius:3px;padding:20px 24px;
+  -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+body.playing.sc-light #playScreen .bar .btn{background:rgba(242,235,217,.82)}
+
+/* 아래쪽 시울·안내는 언제나 한지 위에 */
+.gallery,.note{position:relative;z-index:1;background:var(--hanji)}
+.gallery{padding:22px 18px 28px;margin-left:-18px;margin-right:-18px}
+.note{padding:22px 18px 8px;margin-left:-18px;margin-right:-18px}
+
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;
+  border-bottom:1px solid var(--yeonmuk);padding-bottom:14px;flex-wrap:wrap}
+.brand{font-family:var(--serif);font-weight:600;font-size:clamp(20px,2.4vw,26px);letter-spacing:.06em}
+.brand span{color:var(--dammuk);font-weight:300;font-size:.68em;margin-left:10px;letter-spacing:.14em}
+.steps{display:flex;gap:6px;align-items:center;font-family:var(--serif);font-size:15px;color:var(--dammuk)}
+.steps b{width:2.1em;height:2.1em;display:grid;place-items:center;border:1px solid var(--yeonmuk);
+  border-radius:50%;font-weight:400;transition:.25s}
+.steps b.on{background:var(--muk);color:var(--hanji-card);border-color:var(--muk)}
+.steps b.done{background:var(--hanji-deep);color:var(--muk)}
+
+#playScreen{position:relative;z-index:1}
+.ask{margin:38px 0 22px;text-align:center}
+.ask h2{font-family:var(--serif);font-weight:400;font-size:clamp(24px,3.4vw,36px);margin:0 0 8px;letter-spacing:.02em}
+.ask p{margin:0;color:var(--dammuk);font-size:15px;line-height:1.7}
+
+/* 시작 화면 */
+.namebox{max-width:440px;margin:0 auto;text-align:center}
+.namebox label{display:block;font-size:13px;color:var(--dammuk);margin-bottom:10px;letter-spacing:.04em}
+.namebox input{width:100%;background:transparent;border:none;border-bottom:1px solid var(--yeonmuk);
+  font-family:var(--serif);font-size:24px;color:var(--muk);text-align:center;padding:10px 0;outline:none}
+.namebox input:focus{border-color:var(--inju)}
+.namebox small{display:block;margin-top:12px;font-size:12px;color:var(--yeonmuk);line-height:1.7}
+
+/* 한자와 주석 */
+.hj{font-size:.7em;opacity:.5;letter-spacing:0}
+.gloss{border-bottom:1px dotted var(--inju);padding-bottom:1px}
+.glossbox{margin-top:16px;padding-top:12px;border-top:1px dashed var(--yeonmuk);
+  font-family:var(--sans);font-size:12.5px;color:var(--dammuk);line-height:1.7;text-align:left}
+.glossbox b{font-weight:400;color:var(--muk)}
+.glossbox .hj{font-size:.85em}
+
+/* 카드 */
+/* 선택지 — 가로로 긴 띠를 세로로 쌓습니다 (구절이 한 줄에 들어가도록) */
+.deck{display:grid;gap:12px;grid-template-columns:1fr;max-width:940px;margin:0 auto}
+.card{position:relative;background:var(--hanji-card);border:1px solid var(--yeonmuk);border-radius:2px;
+  display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:20px;
+  padding:22px 24px;text-align:left;cursor:pointer;
+  font-family:var(--serif);font-weight:400;color:var(--muk);
+  font-size:clamp(18px,2.3vw,26px);line-height:1.6;letter-spacing:.01em;word-break:keep-all;
+  box-shadow:2px 3px 0 rgba(29,26,22,.09);
+  transition:transform .16s cubic-bezier(.3,1.5,.6,1),box-shadow .16s,background .16s;
+  animation:deal .3s cubic-bezier(.2,.9,.3,1) backwards}
+.card:nth-child(2){animation-delay:.06s}
+.card:nth-child(3){animation-delay:.12s}
+.card:nth-child(4){animation-delay:.18s}
+@keyframes deal{from{opacity:0;transform:translateX(-12px)}to{opacity:1}}
+.card:hover,.card:focus-visible{transform:translateX(6px);box-shadow:6px 4px 0 rgba(29,26,22,.14);background:#f7f1e2}
+.card:focus-visible{outline:2px solid var(--inju);outline-offset:3px}
+.card:active{transform:translateX(3px) scale(.997)}
+.card .no{font-family:var(--sans);font-size:13px;color:var(--yeonmuk);letter-spacing:.1em;
+  align-self:start;padding-top:.35em}
+.card .body{min-width:0}
+.card .hint{font-family:var(--sans);font-size:12.5px;color:var(--dammuk);letter-spacing:.04em;
+  white-space:nowrap;opacity:0;transition:.2s}
+.card:hover .hint,.card:focus-visible .hint{opacity:1}
+.card .glossbox{margin-top:12px;padding-top:10px}
+.card mark.meter{background:none;color:inherit;position:relative;padding-bottom:2px}
+.card mark.meter::after{content:"";position:absolute;left:0;right:0;bottom:-3px;height:2px;background:var(--inju);opacity:.45}
+.card.write{border-style:dashed;font-family:var(--sans);font-size:15px;color:var(--dammuk)}
+.card.write b{font-family:var(--serif);font-size:20px;color:var(--muk);font-weight:400;
+  display:inline-block;margin-right:12px}
+/* 좁은 화면에서는 안내 문구를 감춰 구절 자리를 넓힙니다 */
+@media(max-width:640px){
+  .card{grid-template-columns:auto 1fr;gap:14px;padding:18px 18px;font-size:17px}
+  .card .hint{display:none}
+}
+
+.picked{margin:32px auto 0;max-width:800px;border-top:1px dashed var(--yeonmuk);padding-top:18px}
+.picked ol{margin:0;padding:0;list-style:none;display:grid;gap:9px}
+.picked li{font-family:var(--serif);font-size:clamp(15px,1.7vw,18px);color:var(--dammuk);
+  display:flex;gap:12px;align-items:baseline;word-break:keep-all}
+.picked li i{font-style:normal;font-family:var(--sans);font-size:12px;color:var(--yeonmuk);flex:none;letter-spacing:.1em}
+
+/* 직접 쓰기 */
+.writer{max-width:640px;margin:24px auto 0;background:var(--hanji-card);border:1px solid var(--yeonmuk);padding:26px;
+  position:relative;z-index:2}
+.writer h4{font-family:var(--serif);font-weight:400;font-size:18px;margin:0 0 6px}
+.writer p.g{font-size:13px;color:var(--dammuk);margin:0 0 16px;line-height:1.7}
+.writer input{width:100%;background:transparent;border:none;border-bottom:1px solid var(--yeonmuk);
+  font-family:var(--serif);font-size:clamp(18px,2.4vw,24px);color:var(--muk);padding:10px 0;outline:none}
+.writer input:focus{border-color:var(--muk)}
+.gauge{margin-top:14px;font-size:13px;color:var(--dammuk);min-height:22px}
+.gauge b{color:var(--inju);font-weight:400}
+.gauge.ok b{color:#3f6b46}
+
+/* 완성 */
+.paper{background:var(--hanji-card);border:1px solid var(--yeonmuk);box-shadow:3px 5px 0 rgba(29,26,22,.08);
+  padding:clamp(44px,7vw,80px) clamp(24px,5vw,64px) clamp(64px,8vw,92px);margin-top:22px;position:relative;overflow:hidden;
+  animation:rise .5s cubic-bezier(.2,.9,.3,1) backwards}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}}
+.poem{display:flex;flex-direction:column;align-items:center;gap:clamp(24px,3.6vw,38px);text-align:center}
+.poem .verse{font-family:var(--serif);font-weight:400;color:var(--muk);margin:0;letter-spacing:.02em;
+  word-break:keep-all;font-size:clamp(22px,3.2vw,36px);line-height:1.55}
+.poem .src{font-family:var(--sans);color:var(--dammuk);margin:9px 0 0;font-size:12.5px;letter-spacing:.04em}
+.paper .glossbox{max-width:640px;margin:34px auto 0;text-align:center}
+.seal{position:absolute;right:clamp(20px,4vw,44px);bottom:clamp(20px,4vw,44px);
+  min-width:66px;padding:10px 8px;border-radius:5px;background:var(--inju);color:#f7efdd;
+  display:grid;place-items:center;font-family:var(--serif);font-size:20px;line-height:1.15;
+  writing-mode:vertical-rl;letter-spacing:.1em;box-shadow:0 0 0 3px rgba(165,54,42,.18);
+  animation:stamp .45s .35s cubic-bezier(.2,1.6,.4,1) backwards}
+@keyframes stamp{from{opacity:0;transform:scale(2.1) rotate(-9deg)}60%{opacity:1}}
+
+/* 원작 공개 */
+.origins{margin-top:34px;border-top:1px solid var(--yeonmuk);padding-top:26px}
+.origins h3{font-family:var(--serif);font-weight:400;font-size:20px;margin:0 0 4px;letter-spacing:.04em}
+.origins .sub{color:var(--dammuk);font-size:13.5px;margin:0 0 20px;line-height:1.7}
+.orig-grid{display:grid;gap:16px;grid-template-columns:1fr}
+@media(min-width:820px){.orig-grid{grid-template-columns:repeat(3,1fr)}}
+.orig{background:var(--hanji-card);border:1px solid var(--yeonmuk);padding:22px 20px}
+.orig .who{font-family:var(--sans);font-size:12.5px;color:var(--dammuk);letter-spacing:.05em;margin-bottom:14px}
+.orig .who b{font-family:var(--serif);font-size:16px;color:var(--muk);font-weight:400;display:block;margin-bottom:3px}
+.orig ul{margin:0;padding:0;list-style:none;display:grid;gap:10px}
+.orig li{font-family:var(--serif);font-size:16px;line-height:1.7;color:var(--dammuk);word-break:keep-all;
+  padding-left:12px;border-left:2px solid transparent}
+.orig li.take{color:var(--muk);border-left-color:var(--inju)}
+.orig li i{font-style:normal;font-family:var(--sans);font-size:11px;color:var(--yeonmuk);margin-right:8px}
+.orig .glossbox{margin-top:14px;padding-top:10px}
+
+/* 단추 */
+.bar{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:26px;position:relative;z-index:2}
+button.btn{font-family:var(--sans);font-size:15px;letter-spacing:.03em;background:var(--hanji-card);color:var(--muk);
+  border:1px solid var(--muk);border-radius:2px;padding:11px 20px;cursor:pointer;transition:.15s}
+button.btn:hover{background:var(--muk);color:var(--hanji-card)}
+button.btn:active{transform:translateY(1px)}
+button.btn:focus-visible{outline:2px solid var(--inju);outline-offset:2px}
+button.btn.ghost{border-color:var(--yeonmuk);color:var(--dammuk)}
+button.btn.ghost:hover{background:var(--hanji-deep);color:var(--muk);border-color:var(--dammuk)}
+button.btn.fill{background:var(--muk);color:var(--hanji-card)}
+button.btn.fill:hover{background:var(--inju);border-color:var(--inju)}
+
+/* 시울 */
+.gallery h3{font-family:var(--serif);font-weight:400;font-size:19px;margin:0 0 4px;letter-spacing:.05em}
+.gallery h3 small{font-family:var(--sans);font-size:12px;color:var(--yeonmuk);margin-left:10px;letter-spacing:.04em}
+.gallery .sub{color:var(--dammuk);font-size:13.5px;margin:0 0 14px;line-height:1.8}
+.gallery .warn{font-size:13px;color:var(--inju);margin:0 0 18px;line-height:1.7;
+  border-left:2px solid var(--inju);padding:2px 0 2px 12px}
+.gallery .warn b{font-weight:400;border-bottom:1px solid var(--inju)}
+.shelf{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.mini{background:var(--hanji-card);border:1px solid var(--yeonmuk);padding:18px 16px 30px;cursor:pointer;
+  transition:.16s;position:relative;text-align:left}
+.mini:hover{transform:translateY(-3px);box-shadow:3px 4px 0 rgba(29,26,22,.1)}
+.mini p{font-family:var(--serif);font-size:14px;line-height:1.65;margin:0 0 7px;color:var(--muk);word-break:keep-all}
+.mini .tag{position:absolute;left:16px;bottom:9px;font-family:var(--sans);font-size:10.5px;color:var(--yeonmuk)}
+.empty{color:var(--dammuk);font-size:14px;border:1px dashed var(--yeonmuk);padding:22px;text-align:center}
+.note{margin-top:40px;font-size:12.5px;color:var(--dammuk);line-height:1.9;text-align:center}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="scene" id="scene"></div>
+
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand">시조의 숲<span>초 · 중 · 종 이어 붙이기</span></div>
+    <div class="steps hidden" id="steps"><b data-i="0">초</b><b data-i="1">중</b><b data-i="2">종</b></div>
+  </header>
+
+  <!-- 0. 시작 -->
+  <section id="startScreen">
+    <div class="ask">
+      <h2>옛 시조의 구절을 이어 한 수를 지어 봅니다</h2>
+      <p>초장·중장·종장을 각각 세 구절 중에서 고르면 됩니다<br>
+        서로 다른 작품에서 온 구절들이 한 수로 묶입니다</p>
+    </div>
+    <div class="namebox">
+      <label for="nameInput">낙관에 새길 이름</label>
+      <input id="nameInput" maxlength="4" placeholder="詩調" autocomplete="off">
+      <small>완성작 오른쪽 아래에 붉은 도장으로 찍힙니다 · 비워 두면 詩調</small>
+    </div>
+    <div class="bar">
+      <button class="btn fill" id="startBtn">시작하기</button>
+    </div>
+  </section>
+
+  <!-- 1. 고르기 -->
+  <section id="playScreen" class="hidden">
+    <div class="ask">
+      <h2 id="askTitle">초장을 고르세요</h2>
+      <p id="askSub"></p>
+    </div>
+    <div class="deck" id="deck"></div>
+    <div class="writer hidden" id="writer">
+      <h4>종장을 직접 지어 보세요</h4>
+      <p class="g">종장은 첫 음보를 세 글자로 맺는 것이 규칙입니다. 아래에 쓰면 첫 음보 글자 수를 세어 드립니다.</p>
+      <input id="writeInput" placeholder="아이야 …" autocomplete="off">
+      <div class="gauge" id="gauge"></div>
+      <div class="bar">
+        <button class="btn fill" id="writeDone">이 구절로 맺기</button>
+        <button class="btn ghost" id="writeCancel">고르기로 돌아가기</button>
+      </div>
+    </div>
+    <div class="picked hidden" id="pickedBox"><ol id="pickedList"></ol></div>
+    <div class="bar">
+      <button class="btn ghost hidden" id="backBtn">한 구절 되돌리기</button>
+      <button class="btn ghost" id="rerollBtn">다른 구절 보기</button>
+    </div>
+  </section>
+
+  <!-- 2. 완성 -->
+  <section id="doneScreen" class="hidden">
+    <div class="ask">
+      <h2>한 수가 되었습니다</h2>
+      <p id="doneSub"></p>
+    </div>
+    <div class="paper" id="paper">
+      <div class="poem" id="poem"></div>
+      <div class="glossbox hidden" id="poemGloss"></div>
+      <div class="seal" id="seal">詩調</div>
+    </div>
+    <div class="bar">
+      <button class="btn fill" id="againBtn">다시 짓기</button>
+      <button class="btn" id="keepBtn">시울에 얹기</button>
+      <button class="btn" id="saveBtn">그림으로 저장</button>
+    </div>
+
+    <div class="origins">
+      <h3>이 구절들의 원작</h3>
+      <p class="sub">붉은 줄이 그어진 구절이 방금 가져다 쓴 자리입니다. 원작 한 수를 통째로 읽어 보세요.</p>
+      <div class="orig-grid" id="origGrid"></div>
+    </div>
+  </section>
+
+  <!-- 시울 -->
+  <section class="gallery">
+    <h3>시울<small>시울 = 현(絃)의 옛말 · 시조는 본디 얹어 부르던 노래</small></h3>
+    <p class="sub">지은 것을 여기 얹어 둡니다. 눌러서 다시 크게 볼 수 있습니다. <span id="unlockNote"></span></p>
+    <p class="warn">새로 고침하거나 창을 닫으면 여기 얹은 것이 모두 사라집니다.
+      마음에 드는 것은 눌러서 열어 <b>그림으로 저장</b>해 두세요.</p>
+    <div id="shelfWrap"><div class="empty">아직 얹은 시조가 없습니다.</div></div>
+  </section>
+
+  <p class="note">
+    구절 아래 작은 글씨는 그 구절을 가져온 원작품과 작가입니다.<br>
+    표기는 현대어 정리본이며, 이본에 따라 차이가 있을 수 있습니다.
+  </p>
+</div>
+
+<script>
+const FIELD=["cho","jung","jong"], LABEL=["초장","중장","종장"];
+const SUB=["서로 다른 세 작품에서 첫 구절을 뽑아 왔습니다",
+           "고른 초장에 이어 붙일 둘째 구절입니다",
+           "이 한 수를 맺을 마지막 구절입니다 · 붉은 밑줄이 종장 첫 음보입니다"];
+const $=id=>document.getElementById(id);
+
+SIJO.forEach((s,i)=>{
+  s._id=i;                                     // 제목이 없는 작품이 많아 내부 번호로 구별합니다
+  s._au=s.author.replace(/\(.*?\)/g,"").trim();  // 한자 병기를 떼어 낸 작가명
+});
+let stage=0, picks=[], usedIds=[], usedAuthors=[], shelf=[], sealName="詩調", completed=0;
+let recent=[];   // 최근 화면에 나온 작품 번호 — 한 판이 끝나도 이어집니다
+const RECENT_CAP=Math.max(CARDS_PER_ROUND, Math.round(SIJO.length*RECENT_RATIO));
+function remember(ids){
+  ids.forEach(id=>{
+    const i=recent.indexOf(id); if(i>=0) recent.splice(i,1);
+    recent.push(id);
+  });
+  while(recent.length>RECENT_CAP) recent.shift();
+}
+
+function sample(a,n){const p=a.slice();for(let i=p.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[p[i],p[j]]=[p[j],p[i]];}return p.slice(0,n);}
+function syl(s){return (s.match(/[가-힣]/g)||[]).length;}
+
+/* 종장 첫 음보: 앞 어절부터 모아 3음절이 되는 지점까지 */
+function firstMeter(text){
+  const w=text.split(" ");let acc="",n=0,i=0;
+  for(;i<w.length;i++){acc=acc?acc+" "+w[i]:w[i];n=syl(acc);if(n>=3)break;}
+  return {meter:acc,rest:w.slice(i+1).join(" "),count:n,ok:n===3};
+}
+
+/* ---- 주석 ---- */
+function parseNotes(str){
+  if(!str) return [];
+  return str.split("*").map(t=>t.trim()).filter(Boolean).map(t=>{
+    const m=t.match(/^(.+?)\s*[:\uFF1A\-\u2013]\s*(.+)$/);
+    return m ? {word:m[1].trim(), mean:m[2].trim()} : null;
+  }).filter(Boolean);
+}
+function notesIn(work,line){
+  return parseNotes(work && work.notes).filter(n=>line.indexOf(n.word)>=0);
+}
+function esc(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+/* 제목의 꺾쇠를 낫표로: <어부사시사> 춘사 → 「어부사시사」 춘사 */
+function titleText(t){return t?t.replace(/<([^>]+)>/g,"「$1」"):"";}
+/* 구절 아래 출처 한 줄 — 제목이 없으면 작가만 */
+function srcLine(p){return (p.title?titleText(p.title)+" · ":"")+p.author;}
+
+/* 한자 병기를 작게 + 주석 낱말에 점선 밑줄 */
+function ink(text,notes){
+  let t=esc(text);
+  (notes||[]).forEach(n=>{
+    const w=esc(n.word);
+    if(t.indexOf(w)>=0) t=t.split(w).join("\u0001"+w+"\u0002");
+  });
+  t=t.replace(/([(\[])([\u3400-\u9fff]+)([)\]])/g,'<span class="hj">$1$2$3</span>');
+  return t.split("\u0001").join('<span class="gloss">').split("\u0002").join('</span>');
+}
+function glossHTML(notes){
+  if(!notes||!notes.length) return "";
+  return notes.map(n=>`<div><b>${ink(n.word)}</b> — ${esc(n.mean)}</div>`).join("");
+}
+/* 저장 이미지용 — 표시 장식 없는 순수 글자 */
+function plain(s){return s;}
+
+/* ---- 배경 ---- */
+function paintScene(i){
+  const s=SCENES[i], el=$("scene");
+  el.classList.remove("in");
+  setTimeout(()=>{
+    el.innerHTML=`<img src="${s.image}" alt="">`+`<span class="cap">${s.name}</span>`;
+    document.body.classList.toggle("sc-dark", s.tone!=="light");
+    document.body.classList.toggle("sc-light", s.tone==="light");
+    el.classList.add("in");
+  },160);
+}
+
+/* ---- 카드 ---- */
+function pool(){
+  // 한 수 안에서 같은 작품은 물론 같은 작가도 두 번 나오지 않게 합니다
+  //   1순위: 이번 수에 안 쓴 작가 중 최근에 안 나온 것
+  //   2순위: 이번 수에 안 쓴 작가
+  //   3순위: 이번 수에 안 쓴 작품 (작가 수가 모자랄 때)
+  //   4순위: 전체 (작품 수가 아주 적을 때)
+  let left=SIJO.filter(s=>!usedAuthors.includes(s._au));
+  if(left.length<CARDS_PER_ROUND) left=SIJO.filter(s=>!usedIds.includes(s._id));
+  const fresh=left.filter(s=>!recent.includes(s._id));
+  if(fresh.length>=CARDS_PER_ROUND) return fresh;
+  if(left.length>=CARDS_PER_ROUND) return left;
+  return SIJO;
+}
+
+function deal(){
+  const cards=sample(pool(),CARDS_PER_ROUND);
+  remember(cards.map(c=>c._id));
+  const deck=$("deck");deck.innerHTML="";
+  cards.forEach((s,i)=>{
+    const line=s[FIELD[stage]];
+    const ns=notesIn(s,line);
+    let body;
+    if(stage===2){
+      const f=firstMeter(line);
+      body = f.ok
+        ? `<mark class="meter">${ink(f.meter,ns)}</mark> ${ink(f.rest,ns)}`
+        : ink(line,ns);
+    } else body=ink(line,ns);
+    const g=glossHTML(ns);
+    const b=document.createElement("button");
+    b.className="card";
+    b.innerHTML=`<span class="no">${String(i+1).padStart(2,"0")}</span>`+
+                `<span class="body">${body}`+(g?`<div class="glossbox">${g}</div>`:"")+`</span>`+
+                `<span class="hint">이 구절로 잇기</span>`;
+    b.addEventListener("click",()=>choose({verse:line,work:s,title:s.title,author:s.author,notes:ns}));
+    deck.appendChild(b);
+  });
+  if(stage===2&&completed>=UNLOCK_AFTER){
+    const w=document.createElement("button");
+    w.className="card write";
+    w.innerHTML=`<span class="no">＋</span>`+
+                `<span class="body"><b>내가 직접 짓기</b>종장 한 구절을 스스로 맺어 봅니다</span>`+
+                `<span class="hint">직접 쓰기</span>`;
+    w.addEventListener("click",openWriter);
+    deck.appendChild(w);
+  }
+  $("askTitle").textContent=LABEL[stage]+"을 고르세요";
+  $("askSub").textContent=SUB[stage];
+  paintSteps();paintScene(stage);
+}
+
+function choose(p){
+  picks.push(p);if(p.work){usedIds.push(p.work._id);usedAuthors.push(p.work._au);}
+  stage++;paintPicked();
+  if(stage<3)deal();else finish();
+}
+function paintSteps(){
+  document.querySelectorAll("#steps b").forEach(el=>{
+    const i=+el.dataset.i;el.className=i<stage?"done":(i===stage?"on":"");
+  });
+}
+function paintPicked(){
+  const box=$("pickedBox");
+  if(!picks.length){box.classList.add("hidden");$("backBtn").classList.add("hidden");return;}
+  box.classList.remove("hidden");
+  $("pickedList").innerHTML=picks.map((p,i)=>`<li><i>${LABEL[i]}</i>${ink(p.verse,p.notes)}</li>`).join("");
+  $("backBtn").classList.toggle("hidden",stage>=3);
+}
+
+/* ---- 직접 쓰기 ---- */
+function openWriter(){
+  $("writer").classList.remove("hidden");$("deck").classList.add("hidden");
+  $("writeInput").value="";$("gauge").textContent="";$("writeInput").focus();
+}
+function closeWriter(){
+  $("writer").classList.add("hidden");$("deck").classList.remove("hidden");
+}
+$("writeInput").addEventListener("input",e=>{
+  const v=e.target.value.trim(),g=$("gauge");
+  if(!v){g.textContent="";g.className="gauge";return;}
+  const f=firstMeter(v);
+  g.className=f.ok?"gauge ok":"gauge";
+  g.innerHTML=f.ok?`첫 음보 <b>${esc(f.meter)}</b> · 세 글자, 규칙에 맞습니다`
+                  :`첫 음보 <b>${esc(f.meter)}</b> · ${f.count}글자입니다. 세 글자로 맞춰 보세요`;
+});
+$("writeDone").addEventListener("click",()=>{
+  const v=$("writeInput").value.trim();if(!v)return;
+  closeWriter();choose({verse:v,title:"",author:sealName+" 지음",notes:[]});
+});
+$("writeCancel").addEventListener("click",closeWriter);
+
+/* ---- 완성 ---- */
+function renderPoem(t,d){
+  t.innerHTML=d.map(p=>`<div class="col">
+      <p class="verse">${ink(p.verse,p.notes)}</p>
+      <p class="src">${ink(srcLine(p))}</p></div>`).join("");
+}
+function paintOrigins(){
+  $("origGrid").innerHTML=picks.map((p,i)=>{
+    const w=p.work;
+    if(!w)return`<div class="orig"><div class="who"><b>직접 지은 구절</b>${esc(p.author)}</div>
+      <ul><li class="take"><i>${LABEL[i]}</i>${esc(p.verse)}</li></ul></div>`;
+    const all=parseNotes(w.notes);
+    const g=glossHTML(all);
+    return`<div class="orig"><div class="who">${w.title?`<b>${ink(titleText(w.title))}</b>`:""}${esc(w.author)}</div>
+      <ul>${FIELD.map((f,j)=>`<li class="${j===i?"take":""}"><i>${LABEL[j]}</i>${ink(w[f],all)}</li>`).join("")}</ul>
+      ${g?`<div class="glossbox">${g}</div>`:""}</div>`;
+  }).join("");
+}
+function showDone(){
+  $("playScreen").classList.add("hidden");
+  $("doneScreen").classList.remove("hidden");
+  document.body.classList.remove("playing","sc-dark","sc-light");
+  $("scene").classList.remove("in");
+  $("doneSub").textContent=picks.map(p=>p.author).join(" · ")+"의 구절이 한 수로 모였습니다";
+  renderPoem($("poem"),picks);
+  $("seal").textContent=sealName;
+  const all=[];picks.forEach(p=>(p.notes||[]).forEach(n=>{if(!all.some(m=>m.word===n.word))all.push(n);}));
+  const gb=$("poemGloss");
+  gb.innerHTML=glossHTML(all);
+  gb.classList.toggle("hidden",!all.length);
+  paintOrigins();
+}
+function finish(){
+  showDone();
+  document.querySelectorAll("#steps b").forEach(el=>el.className="done");
+  completed++;paintUnlock();
+}
+function paintUnlock(){
+  const left=UNLOCK_AFTER-completed;
+  $("unlockNote").textContent=left>0?`${left}수를 더 지으면 ‘종장 직접 쓰기’가 열립니다.`
+                                    :"‘종장 직접 쓰기’가 열려 있습니다.";
+}
+function reset(){
+  stage=0;picks=[];usedIds=[];usedAuthors=[];
+  $("startScreen").classList.add("hidden");
+  $("doneScreen").classList.add("hidden");
+  $("playScreen").classList.remove("hidden");
+  $("steps").classList.remove("hidden");
+  document.body.classList.add("playing");
+  closeWriter();paintPicked();deal();
+}
+
+/* ---- 단추 ---- */
+$("startBtn").addEventListener("click",()=>{
+  sealName=($("nameInput").value.trim()||"詩調").slice(0,4);
+  reset();
+});
+$("nameInput").addEventListener("keydown",e=>{if(e.key==="Enter")$("startBtn").click();});
+$("rerollBtn").addEventListener("click",deal);
+$("backBtn").addEventListener("click",()=>{
+  if(!picks.length)return;
+  const p=picks.pop();if(p.work){usedIds.pop();usedAuthors.pop();}
+  stage--;paintPicked();deal();
+});
+$("againBtn").addEventListener("click",reset);
+$("keepBtn").addEventListener("click",()=>{
+  shelf.push({lines:picks.slice(),name:sealName});
+  paintShelf();
+  $("keepBtn").textContent="시울에 얹었습니다";
+  setTimeout(()=>$("keepBtn").textContent="시울에 얹기",1400);
+});
+
+function paintShelf(){
+  const wrap=$("shelfWrap");
+  if(!shelf.length){wrap.innerHTML=`<div class="empty">아직 얹은 시조가 없습니다.</div>`;return;}
+  wrap.innerHTML=`<div class="shelf">${shelf.map((s,i)=>
+    `<div class="mini" data-i="${i}" role="button" tabindex="0">
+       ${s.lines.map(p=>`<p>${ink(p.verse,p.notes)}</p>`).join("")}
+       <span class="tag">${String(i+1).padStart(2,"0")} ${esc(s.name)}</span>
+     </div>`).join("")}</div>`;
+  wrap.querySelectorAll(".mini").forEach(el=>{
+    const open=()=>{
+      const s=shelf[+el.dataset.i];
+      picks=s.lines.slice();sealName=s.name;stage=3;
+      showDone();window.scrollTo({top:0,behavior:"smooth"});
+    };
+    el.addEventListener("click",open);
+    el.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();open();}});
+  });
+}
+
+/* ---- 그림으로 저장 — 외부 라이브러리 없이 캔버스에 직접 ---- */
+function fitFont(x,text,max,start,min){
+  let fs=start;
+  do{ x.font=`400 ${fs}px Hahmlet, serif`; if(x.measureText(text).width<=max) break; fs-=2; }while(fs>min);
+  return fs;
+}
+$("saveBtn").addEventListener("click",async()=>{
+  await (document.fonts?document.fonts.ready:Promise.resolve());
+  const notes=[];picks.forEach(p=>(p.notes||[]).forEach(n=>{if(!notes.some(m=>m.word===n.word))notes.push(n);}));
+  const W=1200, MAX=W-220;
+  const H=900+(notes.length?notes.length*34+40:0);
+  const c=document.createElement("canvas");c.width=W;c.height=H;
+  const x=c.getContext("2d");
+  x.fillStyle="#f2ebd9";x.fillRect(0,0,W,H);
+  x.strokeStyle="#b5a98f";x.lineWidth=2;x.strokeRect(44,44,W-88,H-88);
+  x.textAlign="center";x.textBaseline="middle";
+  let y=250;
+  picks.forEach(p=>{
+    fitFont(x,plain(p.verse),MAX,56,24);
+    x.fillStyle="#1d1a16";x.fillText(plain(p.verse),W/2,y);
+    x.font=`400 21px "Gowun Dodum", sans-serif`;x.fillStyle="#6d6355";
+    x.fillText(srcLine(p),W/2,y+52);
+    y+=176;
+  });
+  if(notes.length){
+    y+=6;
+    x.strokeStyle="#ded2b8";x.lineWidth=1;
+    x.beginPath();x.moveTo(300,y);x.lineTo(W-300,y);x.stroke();
+    y+=32;
+    x.font=`400 19px "Gowun Dodum", sans-serif`;x.fillStyle="#6d6355";
+    notes.forEach(n=>{x.fillText(`${n.word} — ${n.mean}`,W/2,y);y+=34;});
+  }
+  const n=[...sealName].slice(0,4),box=118;
+  x.fillStyle="#a5362a";x.beginPath();x.roundRect(W-212,H-224,box,box,8);x.fill();
+  x.fillStyle="#f7efdd";const fs=n.length<=2?42:34;
+  x.font=`400 ${fs}px Hahmlet, serif`;
+  const cx=W-212+box/2, sy=H-224+box/2-(n.length-1)*fs*.62;
+  n.forEach((ch,i)=>x.fillText(ch,cx,sy+i*fs*1.24));
+  x.fillStyle="#6d6355";x.font=`400 20px "Gowun Dodum", sans-serif`;x.textAlign="left";
+  x.fillText("근세시가론 · 시조의 숲",84,H-96);
+  const a=document.createElement("a");
+  a.download="시조의숲_"+new Date().toISOString().slice(0,19).replace(/[:T]/g,"")+".png";
+  a.href=c.toDataURL("image/png");a.click();
+});
+
+paintUnlock();
+</script>
+</body>
+</html>
