@@ -1,4 +1,7 @@
 <!DOCTYPE html>
+<!-- 시조의 숲 — 2026-2 고려대학교 근세시가론 수업 자료
+     현대어 표기 및 주석: 윤지아, 2026
+     무단 전재·재배포를 금합니다 -->
 <html lang="ko">
 <head>
 <meta charset="utf-8">
@@ -67,13 +70,13 @@ const SIJO = [
     title:"<한거십팔곡>제7수", author:"권호문(權好文)",
     cho:"말리 말리 하되 이 일 말기 어렵다",
     jung:"이 일 말면 일신(一身)이 한가(閒暇)하다",
-    jong:"어제 엊그제 하던 일이 다 틀린 줄 알겠구나" },
+    jong:"엊그제 하던 일이 다 틀린 줄 알겠구나" },
 
   {
     title:"<한거십팔곡>제11수", author:"권호문(權好文)",
     cho:"바람은 절로 맑고 달은 절로 밝다",
     jung:"죽정송함(竹庭松檻)애 한 점의 먼지도 없으니",
-    jong:"거문고와 만권의 책은 더옥 소쇄(蕭灑)하다",
+    jong:"거문고 만권의 책은 더옥 소쇄(蕭灑)하다",
     notes:"*죽정송함(竹庭松檻): 대나무숲 뜨락과 당상의 소나무 기둥" },
 
   {
@@ -338,7 +341,38 @@ const SIJO = [
     cho:"추강(秋江)에 밤이 드니 물결이 차노매라",
     jung:"낚시대 드리우니 고기 아니 무노매라",
     jong:"무심한 달빛만 싣고 빈 배 저어 오노라" },
+
+  {
+    author:"김득연(金得硏)",
+    cho:"히히히히 또 히히히히",
+    jung:"이러도 히히히히 져러도 히히히히",
+    jong:"매일에 히히히히하니 일일마다 히히히히로다" },
+
+  {
+    author:"무명작",
+    cho:"가마귀 검다 하고 백로야 웃지 마라",
+    jung:"겉이 검은들 속조차 검을소냐",
+    jong:"겉 희고 속 검은 것은 너 뿐인가 하노라" },
+
+  {
+    author:"무명작",
+    cho:"말이 놀라거늘 말고삐 잡고 굽어 보니",
+    jung:"비단수 놓은 청산이 물 아래 잠겨세라",
+    jong:"저 말아 놀라지 마라 이를 구경 함이라" },
+
+  {
+    author:"김성최(金盛最)",
+    cho:"자네 집에 술 익거든 부디 나를 부르시소",
+    jung:"초당에 꽃 피거든 나도 자네를 청하옴세",
+    jong:"백년간 시름 없을 일을 의논코자 하노라" },
+
+  {
+    author:"선우협(鮮于浹)",
+    cho:"간밤에 불던 바람에 복숭아꽃 다 지거다",
+    jung:"아이는 빗자루를 들고 쓸려 하는구나",
+    jong:"낙화는 꽃이 아니랴 쓸어 무엇 하리오" },
 ];
+
 
 
 
@@ -516,6 +550,9 @@ button.btn.fill:hover{background:var(--inju);border-color:var(--inju)}
 .mini .tag{position:absolute;left:16px;bottom:9px;font-family:var(--sans);font-size:10.5px;color:var(--yeonmuk)}
 .empty{color:var(--dammuk);font-size:14px;border:1px dashed var(--yeonmuk);padding:22px;text-align:center}
 .note{margin-top:40px;font-size:12.5px;color:var(--dammuk);line-height:1.9;text-align:center}
+.rights{margin:26px auto 0;padding-top:18px;max-width:640px;border-top:1px solid var(--yeonmuk);
+  font-size:11.5px;color:var(--yeonmuk);line-height:1.9;text-align:center;letter-spacing:.02em}
+.rights b{font-weight:400;color:var(--dammuk)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -604,6 +641,10 @@ button.btn.fill:hover{background:var(--inju);border-color:var(--inju)}
   <p class="note">
     구절 아래 작은 글씨는 그 구절을 가져온 원작품과 작가입니다.<br>
     표기는 현대어 정리본이며, 이본에 따라 차이가 있을 수 있습니다.
+  </p>
+  <p class="rights">
+    시조의 숲 · 2026-2 고려대학교 「근세시가론」 수업 자료<br>
+    현대어 표기 및 주석 <b>윤지아</b> ⓒ 2026 · 무단 전재와 재배포를 금합니다
   </p>
 </div>
 
@@ -892,7 +933,9 @@ $("saveBtn").addEventListener("click",async()=>{
   const cx=W-212+box/2, sy=H-224+box/2-(n.length-1)*fs*.62;
   n.forEach((ch,i)=>x.fillText(ch,cx,sy+i*fs*1.24));
   x.fillStyle="#6d6355";x.font=`400 20px "Gowun Dodum", sans-serif`;x.textAlign="left";
-  x.fillText("근세시가론 · 시조의 숲",84,H-96);
+  x.fillText("시조의 숲 · 고려대학교 「근세시가론」",84,H-108);
+  x.fillStyle="#b5a98f";x.font=`400 15px "Gowun Dodum", sans-serif`;
+  x.fillText("현대어 표기 및 주석 윤지아 ⓒ 2026",84,H-80);
   const a=document.createElement("a");
   a.download="시조의숲_"+new Date().toISOString().slice(0,19).replace(/[:T]/g,"")+".png";
   a.href=c.toDataURL("image/png");a.click();
