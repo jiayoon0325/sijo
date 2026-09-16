@@ -343,25 +343,8 @@ const SIJO = [
 
 
 /* ============================================================
-   ② 배경 그림  ―  초·중·종 화면마다 다른 풍경
-   ------------------------------------------------------------
-   name  : 화면 오른쪽 아래에 작게 뜨는 이름
-   tone  : "light" 밝은 그림 / "dark" 어두운 그림
-           → 그림 위에 덮는 막과 글자 색이 여기에 맞춰 바뀝니다
-           밝은 그림에 "dark" 를 두면 흰 글씨가 되어 안 읽힙니다
-   image : 그림 파일 경로. bg 폴더 안의 파일을 가리킵니다
-
-   그림을 바꾸시려면 둘 중 하나면 됩니다.
-     (1) bg 폴더의 파일을 같은 이름으로 덮어쓰기 → 아래는 손댈 것 없음
-     (2) 새 파일을 bg 에 넣고 아래 경로만 고치기
-   가로로 긴 그림(1760px 이상)이 좋고, 400KB 안쪽이면 더 빨리 뜹니다.
+   ② 설정값
    ============================================================ */
-const SCENES = [
-  { name:"봄 물가의 정자", tone:"light", image:"bg/1_bom.jpg" },
-  { name:"달빛 대숲 길",   tone:"dark",  image:"bg/2_daesup.jpg" },
-  { name:"달 오른 산중",   tone:"dark",  image:"bg/3_san.jpg" }
-];
-
 const CARDS_PER_ROUND = 3;   // 한 판에 보여 줄 카드 수
 const UNLOCK_AFTER = 3;      // 몇 수를 지어야 '직접 쓰기'가 열리는가
 
@@ -387,51 +370,6 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:99;opa
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 .wrap{max-width:1180px;margin:0 auto;padding:28px 20px 90px;position:relative;z-index:1}
 .hidden{display:none!important}
-
-/* 배경 풍경 — 고르는 동안에만 */
-.scene{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;transition:opacity .9s ease}
-.scene.in{opacity:1}
-.scene img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
-.scene::after{content:"";position:absolute;inset:0}
-body.sc-dark .scene::after{
-  background:linear-gradient(to bottom,rgba(16,21,30,.66) 0%,rgba(16,21,30,.24) 40%,rgba(16,21,30,.74) 100%)}
-body.sc-light .scene::after{
-  background:linear-gradient(to bottom,rgba(238,231,213,.80) 0%,rgba(238,231,213,.42) 40%,rgba(238,231,213,.86) 100%)}
-.scene .cap{position:absolute;right:18px;bottom:12px;z-index:2;font-size:11px;letter-spacing:.14em}
-body.sc-dark .scene .cap{color:rgba(242,235,217,.55)}
-body.sc-light .scene .cap{color:rgba(61,55,44,.55)}
-
-/* 어두운 그림 위에서는 글자를 밝게 뒤집습니다 */
-body.playing.sc-dark .brand,body.playing.sc-dark .brand span{color:#efe6d0}
-body.playing.sc-dark .top{border-bottom-color:rgba(239,230,208,.3)}
-body.playing.sc-dark .steps{color:rgba(239,230,208,.75)}
-body.playing.sc-dark .steps b{border-color:rgba(239,230,208,.45);background:rgba(18,24,34,.35);color:#efe6d0}
-body.playing.sc-dark .steps b.on{background:#efe6d0;color:#1d1a16;border-color:#efe6d0}
-body.playing.sc-dark .steps b.done{background:rgba(239,230,208,.28);color:#efe6d0}
-body.playing.sc-dark #playScreen .ask h2{color:#f4ecd8;text-shadow:0 2px 18px rgba(12,16,24,.6)}
-body.playing.sc-dark #playScreen .ask p{color:rgba(244,236,216,.8);text-shadow:0 1px 12px rgba(12,16,24,.6)}
-body.playing.sc-dark #playScreen .card{box-shadow:0 14px 34px rgba(10,14,22,.42)}
-body.playing.sc-dark #playScreen .picked{border-top-color:rgba(239,230,208,.3);
-  background:rgba(18,24,34,.42);border-radius:3px;padding:20px 24px;
-  -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
-body.playing.sc-dark #playScreen .picked li{color:rgba(244,236,216,.9)}
-body.playing.sc-dark #playScreen .picked li i{color:rgba(244,236,216,.5)}
-body.playing.sc-dark #playScreen .bar .btn{background:rgba(18,24,34,.42);border-color:rgba(239,230,208,.4);color:#efe6d0}
-body.playing.sc-dark #playScreen .bar .btn:hover{background:#efe6d0;color:#1d1a16}
-
-/* 밝은 그림 위에서는 먹색 그대로 두고 판만 또렷하게 */
-body.playing.sc-light #playScreen .ask h2,
-body.playing.sc-light #playScreen .ask p{text-shadow:0 1px 14px rgba(242,235,217,.9)}
-body.playing.sc-light #playScreen .card{box-shadow:0 12px 30px rgba(60,54,42,.22)}
-body.playing.sc-light #playScreen .picked{background:rgba(242,235,217,.78);
-  border-radius:3px;padding:20px 24px;
-  -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
-body.playing.sc-light #playScreen .bar .btn{background:rgba(242,235,217,.82)}
-
-/* 아래쪽 시울·안내는 언제나 한지 위에 */
-.gallery,.note{position:relative;z-index:1;background:var(--hanji)}
-.gallery{padding:22px 18px 28px;margin-left:-18px;margin-right:-18px}
-.note{padding:22px 18px 8px;margin-left:-18px;margin-right:-18px}
 
 .top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;
   border-bottom:1px solid var(--yeonmuk);padding-bottom:14px;flex-wrap:wrap}
@@ -582,8 +520,6 @@ button.btn.fill:hover{background:var(--inju);border-color:var(--inju)}
 </style>
 </head>
 <body>
-<div class="scene" id="scene"></div>
-
 <div class="wrap">
 
   <header class="top">
@@ -737,18 +673,6 @@ function glossHTML(notes){
 /* 저장 이미지용 — 표시 장식 없는 순수 글자 */
 function plain(s){return s;}
 
-/* ---- 배경 ---- */
-function paintScene(i){
-  const s=SCENES[i], el=$("scene");
-  el.classList.remove("in");
-  setTimeout(()=>{
-    el.innerHTML=`<img src="${s.image}" alt="">`+`<span class="cap">${s.name}</span>`;
-    document.body.classList.toggle("sc-dark", s.tone!=="light");
-    document.body.classList.toggle("sc-light", s.tone==="light");
-    el.classList.add("in");
-  },160);
-}
-
 /* ---- 카드 ---- */
 function pool(){
   // 한 수 안에서 같은 작품은 물론 같은 작가도 두 번 나오지 않게 합니다
@@ -798,7 +722,7 @@ function deal(){
   }
   $("askTitle").textContent=LABEL[stage]+"을 고르세요";
   $("askSub").textContent=SUB[stage];
-  paintSteps();paintScene(stage);
+  paintSteps();
 }
 
 function choose(p){
@@ -862,8 +786,6 @@ function paintOrigins(){
 function showDone(){
   $("playScreen").classList.add("hidden");
   $("doneScreen").classList.remove("hidden");
-  document.body.classList.remove("playing","sc-dark","sc-light");
-  $("scene").classList.remove("in");
   $("doneSub").textContent=picks.map(p=>p.author).join(" · ")+"의 구절이 한 수로 모였습니다";
   renderPoem($("poem"),picks);
   $("seal").textContent=sealName;
@@ -889,7 +811,6 @@ function reset(){
   $("doneScreen").classList.add("hidden");
   $("playScreen").classList.remove("hidden");
   $("steps").classList.remove("hidden");
-  document.body.classList.add("playing");
   closeWriter();paintPicked();deal();
 }
 
